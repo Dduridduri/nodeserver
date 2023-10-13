@@ -4,9 +4,13 @@ const port = 5000
 const dotenv = require('dotenv');
 
 dotenv.config();
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
+const methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 app.set('view engine','ejs');
-
 
 const {MongoClient, ObjectId} = require('mongodb');
 app.use(express.static(__dirname + '/public'))
@@ -67,15 +71,87 @@ app.get('/view/:id', async (req,res)=>{
   console.log(result)  
 
   res.render("view.ejs",{
-    data : result
-
-    
+    data : result    
     })
 })
+app.get('/write', (req,res)=>{ 
+  res.render("write.ejs")
+})
+
+app.post('/add', async (req,res)=>{
+  console.log(req.body);
+  try{
+    await db.collection("notice").insertOne({
+      title: req.body.title,
+      content: req.body.content
+    })
+  }catch(error){
+    console.log(error)
+  }
+  // res.send("성공")
+  res.redirect('/list')
+
+})
 app.get('/notice', (req,res)=>{
+
   res.send("노티스2");
 })
 
+app.put('/edit', async (req,res)=>{
+  //updateOne({문서},{
+  //$set : {원하는 키:변경값}
+  //})
+  console.log(req.body._id)  
+      await db.collection("notice").updateOne({
+      _id : new ObjectId(req.body._id)
+    },{
+      $set:{
+        title: req.body.title,
+        content: req.body.content
+      }
+    })
+
+  // res.send(result)
+  res.redirect('/list')
+})
+app.delete('/edit', async (req,res)=>{
+  //updateOne({문서},{
+  //$set : {원하는 키:변경값}
+  //})
+  console.log(req.body)  
+      await db.collection("notice").deleteOne({
+      _id : new ObjectId(req.body._id)
+    },{
+      $set:{
+        title: req.body.title,
+        content: req.body.content
+      }
+    })
+
+  // res.send(result)
+  res.redirect('/list')
+})
+app.delete('/delete/:id', async (req,res)=>{
+  //updateOne({문서},{
+  //$set : {원하는 키:변경값}
+  //})
+  console.log(req.params.id)  
+      await db.collection("notice").deleteOne({
+      _id : new ObjectId(req.params.id)
+    })
+
+  // res.send(result)
+  res.redirect('/list')
+})
+
+app.get('/edit/:id', async(req,res)=>{
+  const result = await db.collection("notice").findOne({
+    _id:new ObjectId(req.params.id)
+  })
+  res.render('edit.ejs',{
+    data : result
+  })
+})
 //1.Uniform Interface
 //여러 URL과 METHOD는 일관성이 있어야하며, 하나의 URL에서는 하나의 데이터만 가져오게 디자인하며, 간결하고 예측가능한 URL과 METHOD를 만들어야 한다.
 //동사보다는 명사위주

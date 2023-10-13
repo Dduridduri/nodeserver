@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <form action="/edit/?_method=PUT" method="post" id="form">
+    <h3>글수정</h3>
+    <input type="hidden" name="_id" value="<%= data._id %>">
+    <input type="text" name="title" value="<%= data.title %>">
+    <input type="text" name="content" value="<%= data.content %>">
+    <button type="submit" >완료</button>
+    <button type="button" id="delete">삭제</button>
+  </form>  
+  <!-- <form action="/edit?_method=DELETE" method="post">
+    <input type="hidden" name="_id" value="<%= data._id %>">
+    <input type="hidden" name="title" value="<%= data.title %>">
+    <input type="hidden" name="content" value="<%= data.content %>">
+    <button type="submit" >삭제</button>
+  </form>   -->
+  <script>
+    document.querySelector("#delete").addEventListener('click', function() {
+      let form = document.querySelector("#form")
+      form.action ="/edit?_method=DELETE"
+      form.submit()
+    })
+  </script>
+
+
+</body>
+</html>
