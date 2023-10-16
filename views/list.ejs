@@ -10,16 +10,29 @@
   <%- include('nav.ejs') %>
   <% for(let i = 0; i < data.length; i++) { %>
     <ul class="flex justify-between items-center border bg-slate-50">
+      <li class="basis-1/4"><%= i %></li>
       <li class="basis-2/4"><a href="/view/<%= data[i]._id %>"><%= data[i].title %></a></li>
       <li class="basis-2/4"><%= data[i].content %> <a href="/edit/<%= data[i]._id %>">✏</a>        
       </li>
-      <li><form action="/delete/<%= data[i]._id %>?_method=DELETE" method="post">
-        <button type="submit">🗑</button>
-      </form></li>
+      <!-- <li><form action="/delete/<%= data[i]._id %>?_method=DELETE" method="post">
+        <button type="submit"><a href="javascript:deleteFun('<%= data[i]._id %>')">🗑</a></button>
+      </form></li> -->
+      <li><a href="javascript:deleteFun('<%= data[i]._id %>')">🗑</a></button>
+      </li>
     </ul>    
    <% } %>
    <a href="/write">글쓰기</a>
    
+   <script>
+    function deleteFun(data){
+      let confirmChk = confirm("정말 삭제 하시겠습니까?")
+      console.log(data)
+
+      if(confirmChk){
+        window.location.href = '/delete/'+ data
+      }
+    }
+   </script>
    
 
   <!-- <%= JSON.stringify(data) %> -->

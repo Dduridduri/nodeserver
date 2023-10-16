@@ -52,7 +52,19 @@ app.get('/about', (req,res)=>{
 })
 app.get('/list', async (req,res)=>{
   //async안쓰면 안나옴
-  const result = await db.collection("notice").find().toArray()
+  const result = await db.collection("notice").find().limit(5).toArray()
+  //전체문서가져오는 문법 toArray
+  //하나만 가져올땐 findOne
+
+  console.log(result[0])
+
+  res.render("list.ejs",{
+  data : result
+  })
+})
+app.get('/list/:id', async (req,res)=>{
+  //async안쓰면 안나옴
+  const result = await db.collection("notice").find().skip((req.params.id - 1)*5).limit(5).toArray()
   //전체문서가져오는 문법 toArray
   //하나만 가져올땐 findOne
 
@@ -131,7 +143,7 @@ app.delete('/edit', async (req,res)=>{
   // res.send(result)
   res.redirect('/list')
 })
-app.delete('/delete/:id', async (req,res)=>{
+app.get('/delete/:id', async (req,res)=>{
   //updateOne({문서},{
   //$set : {원하는 키:변경값}
   //})

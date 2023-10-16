@@ -575,6 +575,10 @@ video {
   flex-basis: 75%;
 }
 
+.basis-1\/4 {
+  flex-basis: 25%;
+}
+
 .items-center {
   align-items: center;
 }
