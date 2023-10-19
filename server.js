@@ -2,6 +2,20 @@ const express = require('express')
 const app = express();
 const port = 5000
 const dotenv = require('dotenv');
+const bcrypt = require('bcrypt')
+//로그인 순서 틀리면 안됨
+const session = require('express-session')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+
+
+app.use(passport.initialize());
+app.use(session({
+  secret: '암호화에 쓸 비번',//세션 문서의 암호화
+  resave: false,//유저가 서버로 요청할 떄마다 갱신할건지
+  saveUninitialized: false//로그인 안해도 세션 만들건지
+}))
+app.use(passport.session());
 
 dotenv.config();
 app.use(express.json());
@@ -164,6 +178,62 @@ app.get('/edit/:id', async(req,res)=>{
     data : result
   })
 })
+
+passport.use(new LocalStrategy({
+  usernameField: 'userid',
+  passwordField : 'password'
+}, async (userid,password,cb)=>{
+  let result = await db.collection ("users").findOne({
+    userid : userid
+  })
+  console.log(result)
+
+  if(!result){
+    return cb(null, false, {message:'아이디나 비밀번호가 일치 하지 않음'})
+  }
+  if(result.password === password){
+    return cb(null, result);
+  }else{
+    return cb(null, false, {message:'아이디나 비밀번호가 일치 하지 않음'})
+  }
+}))
+
+app.get('/login', (req,res)=>{
+  res.render('login.ejs')
+})
+app.post('/login', async(req,res,next)=>{
+  console.log(req.body);
+  passport.authenticate('local',(error, user, info)=>{
+    if(error) return req.status(500).json(error);
+    if(!user) return req.status(401).json(info.message)
+    //user는 성공했을때, info는 실패했을때
+    req.logIn(user, (error)=>{
+      if (error) return next(error);
+      res.redirect('/')
+    })
+  })(req,res,next)
+})
+
+
+app.get('/register' , (req,res)=>{
+  res.render("register.ejs")
+})
+app.post('/register', async(req,res)=>{
+
+  let hashPass = await bcrypt.hash(req.body.password,10)
+  console.log(hashPass)
+  try{
+    await db.collection("users").insertOne({
+      userid: req.body.userid,
+      password: hashPass
+  })
+  }catch(error){
+    console.log(error)
+  }
+  // res.send("성공")
+  res.redirect('/list')
+})
+
 //1.Uniform Interface
 //여러 URL과 METHOD는 일관성이 있어야하며, 하나의 URL에서는 하나의 데이터만 가져오게 디자인하며, 간결하고 예측가능한 URL과 METHOD를 만들어야 한다.
 //동사보다는 명사위주
